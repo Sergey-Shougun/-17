@@ -1,6 +1,7 @@
 from django.db import models
-from datetime import datetime
 from .recources import POSITIONS, cashier
+from datetime import datetime, timezone
+from django.utils import timezone
 
 
 class Staff(models.Model):
@@ -20,19 +21,21 @@ class Order(models.Model):
     cost = models.FloatField(default=0.0)
     pickup = models.BooleanField(default=False)
     complete = models.BooleanField(default=False)
-    staff = models.ForeignKey(Staff, on_delete=models.CASCADE)
+    staff = models.ForeignKey(Staff, on_delete=models.CASCADE, related_name='orders')
     products = models.ManyToManyField('Product', through='ProductOrder')
 
     def finish_order(self):
-        self.time_out = datetime.now()
+        self.time_out = timezone.now()
         self.complete = True
         self.save()
 
     def get_duration(self):
+        time_in = timezone.localtime(self.time_in)
         if self.complete:
-            return (self.time_out - self.time_in).total_seconds() // 60
+            time_out = timezone.localtime(self.time_out)
+            return (time_out - time_in).total_seconds()
         else:
-            return (datetime.now() - self.time_in).total_seconds() // 60
+            return (timezone.now() - time_in).total_seconds()
 
 
 class Product(models.Model):
@@ -40,13 +43,6 @@ class Product(models.Model):
     name = models.CharField(max_length=255)
     price = models.FloatField()
     composition = models.TextField(default='Состав не указан')
-
-
-cap = Product(name="Монитор", price=9999.0)
-cap.save()
-vit = Product(name='Витая пара (3м)', price=993.0)
-vit.save()
-kla = Product.objects.create(name='Клавиатура', price=1060.0)
 
 
 class ProductOrder(models.Model):

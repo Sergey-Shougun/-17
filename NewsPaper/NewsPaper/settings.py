@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'news',
     'accounts',
-    'mc_donalds'
+    'mc_donalds',
+    'NewsPortal'
 ]
 
 MIDDLEWARE = [
