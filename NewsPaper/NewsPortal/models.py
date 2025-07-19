@@ -104,12 +104,4 @@ class Comment(models.Model):
 
 # Create your models here.
 
-comments = Comment.objects.filter(post=best_post).order_by('created_at')
-print("\nКомментарии к статье:")
-for comment in comments:
-    print(f"Дата: {comment.created_at}")
-    print(f"Пользователь: {comment.user.username}")
-    print(f"Рейтинг: {comment.rating}")
-    print(f"Текст: {comment.text}\n")
-
 
