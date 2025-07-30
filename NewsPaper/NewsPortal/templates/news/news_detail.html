@@ -1,0 +1,19 @@
+{% extends 'default.html' %}
+{% load news_filters %}
+
+{% block content %}
+    <article>
+        <h1>{{ news.title|censor }}</h1>
+        <div class="news-meta">
+            Дата публикации: {{ news.created_at|date:"d.m.Y" }}
+        </div>
+
+        <div class="news-content">
+            {{ news.content|censor|linebreaks }}
+        </div>
+
+        <a href="{% url 'news_list' %}">Вернуться к списку новостей</a>
+
+
+    </article>
+{% endblock %}

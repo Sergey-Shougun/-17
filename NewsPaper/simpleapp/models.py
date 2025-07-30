@@ -21,7 +21,7 @@ class Product(models.Model):
     )
 
     def __str__(self):
-        return f'{self.name.title()}: {self.description[:20]}'
+        return f'{self.name.title()}: {self.description[:20]} ({self.price})'
 
 
 class Category(models.Model):

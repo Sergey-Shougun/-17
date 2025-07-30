@@ -51,6 +51,9 @@ class Post(models.Model):
     content = models.TextField()
     rating = models.IntegerField(default=0)
 
+    def __str__(self):
+        return self.title
+
     def preview(self):
         preview_text = str(self.content)
         if len(preview_text) > 124:
@@ -103,5 +106,3 @@ class Comment(models.Model):
         self.save()
 
 # Create your models here.
-
-

@@ -1,0 +1,30 @@
+{% extends 'default.html' %}
+{% load news_filters %}
+
+{% block content %}
+    <h1>Последние новости</h1>
+    <p>Всего новостей: {{ total_news }}</p>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Заголовок</th>
+                <th>Дата публикации</th>
+                <th>Краткое содержание</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for post in news_list %}
+                <tr>
+                    <td><a href="{% url 'news_detail' post.id %}">{{ post.title|censor }}</a></td>
+                    <td>{{ post.created_at|date:"d.m.Y" }}</td>
+                    <td>{{ post.content|censor|truncatechars:20 }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="3">Новостей пока нет.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
