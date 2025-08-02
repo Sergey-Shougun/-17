@@ -1,0 +1,37 @@
+{% extends 'default.html' %}
+{% load news_filters %}
+
+{% block content %}
+    <h1>Поиск новостей</h1>
+    <form action="" method="get">
+        {{ filterset.form.as_p }}
+        <input type="submit" value="Найти" />
+    </form>
+
+    <hr>
+
+    {% if posts %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Заголовок</th>
+                    <th>Дата публикации</th>
+                    <th>Краткое содержание</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for post in posts %}
+                    <tr>
+                        <td><a href="{% url 'NewsPortal:news_detail' post.id %}">{{ post.title|censor }}</a></td>
+                        <td>{{ post.created_at|date:"d.m.Y" }}</td>
+                        <td>{{ post.content|censor|truncatewords:20 }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Пагинация (как в news_list.html) -->
+    {% else %}
+        <h2>Новостей не найдено</h2>
+    {% endif %}
+{% endblock %}

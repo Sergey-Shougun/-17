@@ -1,0 +1,36 @@
+{% extends 'default.html' %}
+
+{% block content %}
+    <h1>
+        {% if object %}
+            Редактирование {{ object.get_post_type_display|lower }}
+        {% else %}
+            Создание {{ view.kwargs.post_type|default:"публикации" }}
+        {% endif %}
+    </h1>
+    
+    <form action="" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Сохранить" />
+    </form>
+    
+    <style>
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+        }
+        .helptext {
+            display: block;
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+{% endblock %}

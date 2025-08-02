@@ -13,10 +13,12 @@ class Author(models.Model):
             post_rating_sum=Sum('rating')
         )['post_rating_sum'] or 0
         author_post_rating *= 3
+
         # Рейтинг комментариев автора
         author_comments_rating = Comment.objects.filter(user=self.user).aggregate(
             comments_rating_sum=Sum('rating')
         )['comments_rating_sum'] or 0
+
         # Рейтинг комментариев к статьям автора
         post_ids = Post.objects.filter(author=self).values_list('id', flat=True)
         comments_to_author_post_rating = Comment.objects.filter(
@@ -24,12 +26,19 @@ class Author(models.Model):
         ).exclude(user=self.user).aggregate(
             comments_rating_sum=Sum('rating')
         )['comments_rating_sum'] or 0
+
         self.rating = author_post_rating + author_comments_rating + comments_to_author_post_rating
         self.save()
+
+    def __str__(self):
+        return self.user.username
 
 
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
 
 
 class Post(models.Model):
@@ -37,12 +46,13 @@ class Post(models.Model):
     NEWS = 'NW'
     POST_TYPES = [
         (ARTICLE, 'Статья'),
-        (NEWS, 'Новость')
+        (NEWS, 'Новость'),
     ]
+
     author = models.ForeignKey(
         Author,
         on_delete=models.CASCADE,
-        related_name='posts'  # Явное указание related_name
+        related_name='posts'
     )
     post_type = models.CharField(max_length=2, choices=POST_TYPES)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -50,6 +60,14 @@ class Post(models.Model):
     title = models.CharField(max_length=200)
     content = models.TextField()
     rating = models.IntegerField(default=0)
+
+    def get_categories_display(self):
+        """Возвращает строку с названиями категорий через запятую"""
+        return ", ".join([category.name for category in self.categories.all()])
+
+    def get_post_type_display_name(self):
+        """Возвращает читаемое название типа поста"""
+        return dict(self.POST_TYPES).get(self.post_type, 'Неизвестный тип')
 
     def __str__(self):
         return self.title
@@ -81,6 +99,9 @@ class PostCategory(models.Model):
         related_name='category_posts'
     )
 
+    def __str__(self):
+        return f"{self.post.title} - {self.category.name}"
+
 
 class Comment(models.Model):
     post = models.ForeignKey(
@@ -97,12 +118,13 @@ class Comment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     rating = models.IntegerField(default=0)
 
-    def dislike(self):
-        self.rating += 1
-        self.save()
+    def __str__(self):
+        return f"Комментарий от {self.user.username} к {self.post.title}"
 
     def like(self):
         self.rating += 1
         self.save()
 
-# Create your models here.
+    def dislike(self):
+        self.rating -= 1
+        self.save()

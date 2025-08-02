@@ -1,0 +1,25 @@
+{% extends 'default.html' %}
+{% load news_filters %}
+
+{% block content %}
+    <article>
+        <h1>{{ article.title|censor }}</h1>
+        <div class="news-meta">
+            <strong>Тип:</strong> {{ article.get_post_type_display_name }}
+            <strong>Автор:</strong> {{ article.author.user.username }}
+            <strong>Дата публикации:</strong> {{ article.created_at|date:"d.m.Y H:i" }}
+            <strong>Рейтинг:</strong> {{ article.rating }}
+            <strong>Категории:</strong> {{ article.get_categories_display }}
+        </div>
+
+        <div class="news-content">
+            {{ article.content|censor|linebreaks }}
+        </div>
+
+        <div class="actions">
+            <a href="{% url 'NewsPortal:article_edit' article.pk %}" class="btn">Редактировать</a>
+            <a href="{% url 'NewsPortal:article_delete' article.pk %}" class="btn danger">Удалить</a>
+            <a href="{% url 'NewsPortal:article_list' %}" class="btn">Вернуться к списку статей</a>
+        </div>
+    </article>
+{% endblock %}

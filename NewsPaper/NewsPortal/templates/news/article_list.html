@@ -1,0 +1,51 @@
+{% extends 'default.html' %}
+{% load news_filters %}
+
+{% block content %}
+    <h1>Все статьи</h1>
+    <p>Всего статей: {{ total_articles }}</p>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Заголовок</th>
+                <th>Дата публикации</th>
+                <th>Краткое содержание</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for article in page_obj %}
+                <tr>
+                    <td><a href="{% url 'NewsPortal:article_detail' article.id %}">{{ article.title|censor }}</a></td>
+                    <td>{{ article.created_at|date:"d.m.Y" }}</td>
+                    <td>{{ article.content|censor|truncatewords:20 }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <!-- Пагинация -->
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; первая</a>
+                <a href="?page={{ page_obj.previous_page_number }}">предыдущая</a>
+            {% endif %}
+            
+            <span class="current">
+                Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}.
+            </span>
+            
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">следующая</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">последняя &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+    
+    <a href="{% url 'NewsPortal:article_create' %}" class="btn">Добавить статью</a>
+{% endblock %}
+
+
+
+

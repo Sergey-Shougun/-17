@@ -4,7 +4,7 @@
 {% block content %}
     <h1>Последние новости</h1>
     <p>Всего новостей: {{ total_news }}</p>
-    
+
     <table>
         <thead>
             <tr>
@@ -14,17 +14,48 @@
             </tr>
         </thead>
         <tbody>
-            {% for post in news_list %}
+            {% for post in page_obj %}
                 <tr>
-                    <td><a href="{% url 'news_detail' post.id %}">{{ post.title|censor }}</a></td>
+                    <td><a href="{% url 'NewsPortal:news_detail' post.id %}">{{ post.title|censor }}</a></td>
                     <td>{{ post.created_at|date:"d.m.Y" }}</td>
-                    <td>{{ post.content|censor|truncatechars:20 }}</td>
-                </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="3">Новостей пока нет.</td>
+                    <td>{{ post.content|censor|truncatewords:20 }}</td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
+
+    <!-- Пагинация -->
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; первая</a>
+                <a href="?page={{ page_obj.previous_page_number }}">предыдущая</a>
+            {% endif %}
+
+            <span class="current">
+                Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}.
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">следующая</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">последняя &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+
+    <style>
+        .pagination {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .pagination a {
+            margin: 0 5px;
+            text-decoration: none;
+            color: #007bff;
+        }
+        .pagination .current {
+            font-weight: bold;
+            margin: 0 10px;
+        }
+    </style>
 {% endblock %}

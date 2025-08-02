@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'accounts',
     'mc_donalds',
     'NewsPortal',
-    'simpleapp'
+    'simpleapp',
+    'django_filters'
 ]
 
 MIDDLEWARE = [
