@@ -13,7 +13,6 @@ def news_detail(request, pk):
 
 
 def article_list(request):
-    """Список статей с постраничным выводом"""
     articles = Post.objects.filter(post_type='AR').order_by('-created_at')
     paginator = Paginator(articles, 10)  # 10 статей на странице
     page_number = request.GET.get('page')
@@ -26,7 +25,7 @@ def article_list(request):
 
 
 def article_detail(request, pk):
-    article = get_object_or_404(Post, pk=pk)  # Убрали фильтр по типу
+    article = get_object_or_404(Post, pk=pk)
     return render(request, 'news/article_detail.html', {'article': article})
 
 
@@ -49,17 +48,13 @@ class PostSearch(ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        # Получаем базовый queryset
         queryset = super().get_queryset()
-        # Фильтруем только новости
         queryset = queryset.filter(post_type='NW')
-        # Применяем фильтр
         self.filterset = PostFilter(self.request.GET, queryset=queryset)
         return self.filterset.qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Добавляем фильтр в контекст
         context['filterset'] = self.filterset
         return context
 
@@ -72,10 +67,7 @@ class NewsCreate(CreateView):
     def form_valid(self, form):
         post = form.save(commit=False)
         post.post_type = 'NW'
-        response = super().form_valid(form)
-        # Сохраняем связи ManyToMany
-        form.save_m2m()
-        return response
+        return super().form_valid(form)
 
     def get_success_url(self):
         return reverse_lazy('NewsPortal:news_detail', kwargs={'pk': self.object.pk})
@@ -93,16 +85,13 @@ class NewsUpdate(UpdateView):
         return reverse_lazy('NewsPortal:news_detail', kwargs={'pk': self.object.pk})
 
     def form_valid(self, form):
-        response = super().form_valid(form)
-        # Сохраняем связи ManyToMany
-        form.save_m2m()
-        return response
+        return super().form_valid(form)
 
 
 class NewsDelete(DeleteView):
     model = Post
     template_name = 'news/post_delete.html'
-    success_url = reverse_lazy('NewsPortal:news_list')  # Добавьте пространство имен
+    success_url = reverse_lazy('NewsPortal:news_list')
 
     def get_queryset(self):
         return super().get_queryset().filter(post_type='NW')
@@ -115,11 +104,8 @@ class ArticleCreate(CreateView):
 
     def form_valid(self, form):
         post = form.save(commit=False)
-        post.post_type = 'AR'  # Устанавливаем тип статьи
-        response = super().form_valid(form)
-        # Сохраняем связи ManyToMany
-        form.save_m2m()
-        return response
+        post.post_type = 'AR'
+        return super().form_valid(form)
 
     def get_success_url(self):
         return reverse_lazy('NewsPortal:article_detail', kwargs={'pk': self.object.pk})
@@ -137,16 +123,13 @@ class ArticleUpdate(UpdateView):
         return reverse_lazy('NewsPortal:article_detail', kwargs={'pk': self.object.pk})
 
     def form_valid(self, form):
-        response = super().form_valid(form)
-        # Сохраняем связи ManyToMany
-        form.save_m2m()
-        return response
+        return super().form_valid(form)
 
 
 class ArticleDelete(DeleteView):
     model = Post
     template_name = 'news/post_delete.html'
-    success_url = reverse_lazy('NewsPortal:article_list')  # Исправьте здесь тоже
+    success_url = reverse_lazy('NewsPortal:article_list')
 
     def get_queryset(self):
         return super().get_queryset().filter(post_type='AR')

@@ -6,7 +6,8 @@ class PostForm(forms.ModelForm):
     categories = forms.ModelMultipleChoiceField(
         queryset=Category.objects.all(),
         widget=forms.CheckboxSelectMultiple,
-        required=False
+        required=False,
+        label='Категории'
     )
 
     class Meta:

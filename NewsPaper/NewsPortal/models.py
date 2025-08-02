@@ -8,18 +8,15 @@ class Author(models.Model):
     rating = models.IntegerField(default=0)
 
     def update_rating(self):
-        # Рейтинг статей автора
         author_post_rating = Post.objects.filter(author=self).aggregate(
             post_rating_sum=Sum('rating')
         )['post_rating_sum'] or 0
         author_post_rating *= 3
 
-        # Рейтинг комментариев автора
         author_comments_rating = Comment.objects.filter(user=self.user).aggregate(
             comments_rating_sum=Sum('rating')
         )['comments_rating_sum'] or 0
 
-        # Рейтинг комментариев к статьям автора
         post_ids = Post.objects.filter(author=self).values_list('id', flat=True)
         comments_to_author_post_rating = Comment.objects.filter(
             post__id__in=post_ids
@@ -62,11 +59,9 @@ class Post(models.Model):
     rating = models.IntegerField(default=0)
 
     def get_categories_display(self):
-        """Возвращает строку с названиями категорий через запятую"""
         return ", ".join([category.name for category in self.categories.all()])
 
     def get_post_type_display_name(self):
-        """Возвращает читаемое название типа поста"""
         return dict(self.POST_TYPES).get(self.post_type, 'Неизвестный тип')
 
     def __str__(self):

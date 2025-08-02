@@ -25,7 +25,6 @@ class PostFilter(django_filters.FilterSet):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Устанавливаем начальные значения для полей
         if not self.data:
             self.queryset = self.queryset.none()
 

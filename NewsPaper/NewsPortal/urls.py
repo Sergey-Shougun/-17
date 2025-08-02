@@ -1,7 +1,7 @@
 from django.urls import path
 from . import views
 
-app_name = 'NewsPortal'  # Добавляем app_name для пространства имен
+app_name = 'NewsPortal'
 
 urlpatterns = [
     path('', views.news_list, name='news_list'),
