@@ -1,5 +1,8 @@
 from django.urls import path
 from . import views
+from django.conf.urls import handler403
+
+handler403 = 'NewsPortal.views.permission_denied_view'
 
 app_name = 'NewsPortal'
 
@@ -15,4 +18,7 @@ urlpatterns = [
     path('articles/<int:pk>/', views.article_detail, name='article_detail'),
     path('articles/<int:pk>/edit/', views.ArticleUpdate.as_view(), name='article_edit'),
     path('articles/<int:pk>/delete/', views.ArticleDelete.as_view(), name='article_delete'),
+    path('become-author/', views.become_author, name='become_author'),
+    path('profile/', views.profile, name='profile'),
+    path('profile/edit/', views.ProfileUpdateView.as_view(), name='profile_edit'),
 ]

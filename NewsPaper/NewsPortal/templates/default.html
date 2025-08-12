@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
+{% load auth_filters %}
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}Новостной портал{% endblock %}</title>
@@ -122,6 +123,34 @@
             gap: 10px;
             margin-top: 20px;
         }
+        .become-author-btn {
+            background: linear-gradient(to right, #4CAF50, #2E7D32);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: bold;
+            text-transform: uppercase;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .become-author-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+            background: linear-gradient(to right, #43A047, #1B5E20);
+        }
+        .profile-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: auto;
+        }
+        .author-badge .badge {
+            background: #4CAF50;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
     </style>
 </head>
 <body>
@@ -134,6 +163,20 @@
         {% if user.is_authenticated %}
             <a href="{% url 'NewsPortal:news_create' %}" class="btn">Добавить новость</a>
             <a href="{% url 'NewsPortal:article_create' %}" class="btn">Добавить статью</a>
+        {% endif %}
+        {% if user.is_authenticated %}
+            <div class="user-actions">
+                {% if not user|in_group:'authors' %}
+                    <a href="{% url 'NewsPortal:become_author' %}" class="btn become-author-btn">
+                        Стать автором
+                    </a>
+                {% endif %}
+            </div>
+{% endif %}
+        {% if user.is_authenticated %}
+            <a href="{% url 'NewsPortal:profile' %}" class="profile-link">
+                <i class="fas fa-user"></i> Профиль
+            </a>
         {% endif %}
     </nav>
 </header>

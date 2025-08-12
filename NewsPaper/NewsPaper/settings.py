@@ -36,13 +36,17 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.yandex',
     'django.contrib.flatpages',
     'news',
     'accounts',
     'mc_donalds',
-    'NewsPortal',
     'simpleapp',
-    'django_filters'
+    'django_filters',
+    'NewsPortal.apps.NewsportalConfig'
 ]
 
 MIDDLEWARE = [
@@ -53,6 +57,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'NewsPaper.urls'
@@ -68,6 +73,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'NewsPortal.context_processors.social_login_buttons'
             ],
         },
     },
@@ -126,5 +132,68 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STATICFILES_DIRS = [
     BASE_DIR / "static"
 ]
-STATIC_ROOT=BASE_DIR/'staticfiles'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 SITE_ID = 1
+
+# Настройки allauth
+ACCOUNT_UNIQUE_EMAIL = True  # Уникальный email
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'  # Обязательная верификация email
+ACCOUNT_CONFIRM_EMAIL_ON_GET = True  # Подтверждение при переходе по ссылке
+ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 3  # Срок действия ссылки (дни)
+ACCOUNT_LOGIN_METHODS = ['email']  # Вход по email
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+# Настройки почты (для тестирования)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Вывод писем в консоль
+EMAIL_HOST = 'localhost'
+EMAIL_PORT = 1025
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+SOCIALACCOUNT_PROVIDERS = {
+    'yandex': {
+        'APP': {
+            'client_id': '779ca1891b9a47acb9867c32da8add44',
+            'secret': 'd69cfdea33414338a7a9100c476a0b90',
+            'key': ''
+        },
+        'SCOPE': ['login:email', 'login:info'],
+        'AUTH_PARAMS': {'access_type': 'online'},
+    }
+}
+LOGIN_URL = '/accounts/login/'
+LOGIN_REDIRECT_URL = '/news/'
+ACCOUNT_LOGOUT_REDIRECT_URL = '/news/'
+
+
+CSRF_TRUSTED_ORIGINS = ['http://localhost:8000']
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+        'allauth': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    },
+}
+ACCOUNT_AUTHENTICATED_LOGIN_REDIRECTS = True
+
+ACCOUNT_FORMS = {
+    'login': 'NewsPortal.forms.CustomLoginForm',
+    'signup': 'NewsPortal.forms.CustomSignupForm',
+}

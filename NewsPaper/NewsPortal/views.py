@@ -1,10 +1,41 @@
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
-from django.shortcuts import render, get_object_or_404
 from .filters import PostFilter
 from .forms import PostForm
-from .models import Post
+from .models import Post, Author
 from django.core.paginator import Paginator
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import PermissionDenied
+from django.contrib import messages
+from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import Group, User
+from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import render
+
+
+class ProfileUpdateView(LoginRequiredMixin, UpdateView):
+    model = User
+    fields = ['first_name', 'last_name', 'email']
+    template_name = 'account/profile_edit.html'
+    success_url = reverse_lazy('NewsPortal:profile')
+
+    def get_object(self, queryset=None):
+        return self.request.user
+
+
+def permission_denied_view(request, exception):
+    return render(request, '403.html', status=403)
+
+
+@login_required
+def become_author(request):
+    author_group, created = Group.objects.get_or_create(name='authors')
+    request.user.groups.add(author_group)
+    from .models import Author
+    Author.objects.get_or_create(user=request.user)
+
+    return redirect('NewsPortal:profile')
 
 
 def news_detail(request, pk):
@@ -59,10 +90,27 @@ class PostSearch(ListView):
         return context
 
 
-class NewsCreate(CreateView):
+class AuthorRequiredMixin(UserPassesTestMixin):
+    def test_func(self):
+        return self.request.user.groups.filter(name='authors').exists()
+
+    def handle_no_permission(self):
+        return redirect('NewsPortal:become_author')
+
+
+class NewsCreate(AuthorRequiredMixin, LoginRequiredMixin, CreateView):
     form_class = PostForm
     model = Post
     template_name = 'news/post_edit.html'
+    login_url = '/accounts/login/'
+    permission_required = 'NewsPortal.add_post'
+
+    def handle_no_permission(self):
+        if not self.request.user.is_authenticated:
+            return redirect('account_login')
+        else:
+            messages.error(self.request, "У вас нет прав для создания новостей. Станьте автором!")
+            return redirect('NewsPortal:become_author')
 
     def form_valid(self, form):
         post = form.save(commit=False)
@@ -73,10 +121,25 @@ class NewsCreate(CreateView):
         return reverse_lazy('NewsPortal:news_detail', kwargs={'pk': self.object.pk})
 
 
-class NewsUpdate(UpdateView):
+class NewsUpdate(LoginRequiredMixin, UpdateView):
     form_class = PostForm
     model = Post
     template_name = 'news/post_edit.html'
+    login_url = '/accounts/login/'
+    permission_required = 'NewsPortal.change_post'
+
+    def handle_no_permission(self):
+        if not self.request.user.is_authenticated:
+            return redirect('account_login')
+        else:
+            messages.error(self.request, "У вас нет прав для редактирования новостей. Станьте автором!")
+            return redirect('NewsPortal:become_author')
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.author.user != request.user:
+            raise PermissionDenied("Вы не являетесь автором этой новости")
+        return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
         return super().get_queryset().filter(post_type='NW')
@@ -88,19 +151,43 @@ class NewsUpdate(UpdateView):
         return super().form_valid(form)
 
 
-class NewsDelete(DeleteView):
+class NewsDelete(LoginRequiredMixin, DeleteView):
     model = Post
     template_name = 'news/post_delete.html'
     success_url = reverse_lazy('NewsPortal:news_list')
+    login_url = '/accounts/login/'
+    permission_required = 'NewsPortal.delete_post'
+
+    def handle_no_permission(self):
+        if not self.request.user.is_authenticated:
+            return redirect('account_login')
+        else:
+            messages.error(self.request, "У вас нет прав для удаления новостей. Станьте автором!")
+            return redirect('NewsPortal:become_author')
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.author.user != request.user:
+            raise PermissionDenied("Вы не являетесь автором этой новости")
+        return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
         return super().get_queryset().filter(post_type='NW')
 
 
-class ArticleCreate(CreateView):
+class ArticleCreate(AuthorRequiredMixin, LoginRequiredMixin, CreateView):
     form_class = PostForm
     model = Post
     template_name = 'news/article_edit.html'
+    login_url = '/accounts/login/'
+    permission_required = 'NewsPortal.add_post'
+
+    def handle_no_permission(self):
+        if not self.request.user.is_authenticated:
+            return redirect('account_login')
+        else:
+            messages.error(self.request, "У вас нет прав для создания статей. Станьте автором!")
+            return redirect('NewsPortal:become_author')
 
     def form_valid(self, form):
         post = form.save(commit=False)
@@ -111,10 +198,25 @@ class ArticleCreate(CreateView):
         return reverse_lazy('NewsPortal:article_detail', kwargs={'pk': self.object.pk})
 
 
-class ArticleUpdate(UpdateView):
+class ArticleUpdate(LoginRequiredMixin, UpdateView):
     form_class = PostForm
     model = Post
     template_name = 'news/article_edit.html'
+    login_url = '/accounts/login/'
+    permission_required = 'NewsPortal.change_post'
+
+    def handle_no_permission(self):
+        if not self.request.user.is_authenticated:
+            return redirect('account_login')
+        else:
+            messages.error(self.request, "У вас нет прав для редактирования статей. Станьте автором!")
+            return redirect('NewsPortal:become_author')
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.author.user != request.user:
+            raise PermissionDenied("Вы не являетесь автором этой новости")
+        return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
         return super().get_queryset().filter(post_type='AR')
@@ -126,12 +228,52 @@ class ArticleUpdate(UpdateView):
         return super().form_valid(form)
 
 
-class ArticleDelete(DeleteView):
+class ArticleDelete(LoginRequiredMixin, DeleteView):
     model = Post
     template_name = 'news/post_delete.html'
     success_url = reverse_lazy('NewsPortal:article_list')
+    login_url = '/accounts/login/'
+    permission_required = 'NewsPortal.delete_post'
+
+    def handle_no_permission(self):
+        if not self.request.user.is_authenticated:
+            return redirect('account_login')
+        else:
+            messages.error(self.request, "У вас нет прав для удаления статей. Станьте автором!")
+            return redirect('NewsPortal:become_author')
+
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.author.user != request.user:
+            raise PermissionDenied("Вы не являетесь автором этой новости")
+        return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
         return super().get_queryset().filter(post_type='AR')
+
+
+@login_required
+def become_author(request):
+    author_group = Group.objects.get_or_create(name='authors')[0]
+    request.user.groups.add(author_group)
+
+    Author.objects.get_or_create(user=request.user)
+
+    return redirect('NewsPortal:profile')
+
+
+@login_required
+def profile(request):
+    try:
+        author_profile = Author.objects.get(user=request.user)
+    except Author.DoesNotExist:
+        author_profile = None
+
+    context = {
+        'user': request.user,
+        'is_author': request.user.groups.filter(name='authors').exists(),
+        'author_profile': author_profile,
+    }
+    return render(request, 'account/profile.html', context)
 
 # Create your views here.

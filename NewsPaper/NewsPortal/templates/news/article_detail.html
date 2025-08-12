@@ -16,6 +16,13 @@
             {{ article.content|censor|linebreaks }}
         </div>
 
+        {% if user.is_authenticated and user == article.author.user %}
+            <div class="actions">
+                <a href="{% url 'NewsPortal:article_edit' article.pk %}" class="btn">Редактировать</a>
+                <a href="{% url 'NewsPortal:article_delete' article.pk %}" class="btn danger">Удалить</a>
+            </div>
+        {% endif %}
+
         <div class="actions">
             <a href="{% url 'NewsPortal:article_edit' article.pk %}" class="btn">Редактировать</a>
             <a href="{% url 'NewsPortal:article_delete' article.pk %}" class="btn danger">Удалить</a>

@@ -1,0 +1,36 @@
+{% extends 'default.html' %}
+
+{% block content %}
+<div class="profile-container">
+    <h1>Ваш профиль</h1>
+    
+    <div class="profile-info">
+        <p><strong>Имя пользователя:</strong> {{ user.username }}</p>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+        
+        {% if is_author %}
+            <div class="author-badge">
+                <span class="badge">Автор</span>
+                {% if author_profile %}
+                    <p><strong>Рейтинг:</strong> {{ author_profile.rating }}</p>
+                    <p><strong>Дата регистрации как автор:</strong> {{ author_profile.created_at|date:"d.m.Y" }}</p>
+                {% else %}
+                    <p>Профиль автора пока недоступен</p>
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="become-author-section">
+                <p>Хотите публиковать статьи и новости?</p>
+                <a href="{% url 'NewsPortal:become_author' %}" class="btn become-author-btn">
+                    Стать автором
+                </a>
+            </div>
+        {% endif %}
+        {% if user.is_authenticated %}
+            <a href="{% url 'NewsPortal:profile_edit' %}" class="btn btn-secondary">
+                Редактировать профиль
+            </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

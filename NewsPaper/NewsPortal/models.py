@@ -1,11 +1,17 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Sum
+from django.utils import timezone
 
 
 class Author(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     rating = models.IntegerField(default=0)
+    bio = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} (Автор)"
 
     def update_rating(self):
         author_post_rating = Post.objects.filter(author=self).aggregate(
@@ -26,9 +32,6 @@ class Author(models.Model):
 
         self.rating = author_post_rating + author_comments_rating + comments_to_author_post_rating
         self.save()
-
-    def __str__(self):
-        return self.user.username
 
 
 class Category(models.Model):

@@ -1,0 +1,14 @@
+{% extends "default.html" %}
+{% load auth_tags %}
+
+{% block content %}
+<div class="container">
+    <h2>Доступ запрещен</h2>
+    <p>У вас недостаточно прав для выполнения этого действия.</p>
+    {% if not user|in_group:'authors' %}
+        <a href="{% url 'NewsPortal:become_author' %}" class="btn btn-primary">
+            Стать автором
+        </a>
+    {% endif %}
+</div>
+{% endblock %}
