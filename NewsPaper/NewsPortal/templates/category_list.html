@@ -1,0 +1,38 @@
+{% extends "default.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>Категории новостей</h1>
+    <div class="categories">
+        {% for category in categories %}
+        <div class="category-card">
+            <h2>
+                <a href="{% url 'NewsPortal:category_detail' category.id %}">
+                    {{ category.name }}
+                </a>
+            </h2>
+            <a href="{% url 'NewsPortal:category_detail' category.id %}" 
+               class="btn btn-primary">
+                Посмотреть новости
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .categories {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        margin-top: 30px;
+    }
+    .category-card {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+</style>
+{% endblock %}

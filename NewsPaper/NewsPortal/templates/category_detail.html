@@ -1,0 +1,57 @@
+{% extends "default.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>
+        Новости в категории: {{ category.name }}
+        {% if user.is_authenticated %}
+            {% if is_subscribed %}
+                <a href="{% url 'NewsPortal:unsubscribe_category' category.id %}"
+                   class="btn btn-sm btn-danger">
+                    Отписаться
+                </a>
+            {% else %}
+                <a href="{% url 'NewsPortal:subscribe_category' category.id %}"
+                   class="btn btn-sm btn-success">
+                    Подписаться
+                </a>
+            {% endif %}
+        {% endif %}
+    </h1>
+
+    <div class="subscription-info">
+        {% if is_subscribed %}
+            <div class="alert alert-success">
+                Вы подписаны на обновления этой категории
+            </div>
+        {% elif user.is_authenticated %}
+            <div class="alert alert-info">
+                Подпишитесь, чтобы получать уведомления о новых статьях
+            </div>
+        {% endif %}
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Заголовок</th>
+                <th>Дата публикации</th>
+                <th>Краткое содержание</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for post in posts %}
+            <tr>
+                <td><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></td>
+                <td>{{ post.created_at|date:"d.m.Y" }}</td>
+                <td>{{ post.preview }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3">В этой категории пока нет новостей</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

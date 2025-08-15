@@ -29,6 +29,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'django_apscheduler',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -46,7 +47,7 @@ INSTALLED_APPS = [
     'mc_donalds',
     'simpleapp',
     'django_filters',
-    'NewsPortal.apps.NewsportalConfig'
+    'NewsPortal.apps.NewsPortalConfig'
 ]
 
 MIDDLEWARE = [
@@ -73,11 +74,15 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'NewsPortal.context_processors.social_login_buttons'
+                'NewsPortal.context_processors.social_login_buttons',
+                'django.template.context_processors.request',
+                'NewsPortal.context_processors.site_settings',
+                'NewsPortal.context_processors.site_info',
             ],
         },
     },
 ]
+SITE_NAME = 'NewsPortal'
 
 WSGI_APPLICATION = 'NewsPaper.wsgi.application'
 
@@ -88,9 +93,11 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+        'OPTIONS': {
+            'timeout': 60,
+        }
     }
 }
-
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
@@ -142,10 +149,12 @@ ACCOUNT_CONFIRM_EMAIL_ON_GET = True  # Подтверждение при пер�
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 3  # Срок действия ссылки (дни)
 ACCOUNT_LOGIN_METHODS = ['email']  # Вход по email
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
-# Настройки почты (для тестирования)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Вывод писем в консоль
-EMAIL_HOST = 'localhost'
-EMAIL_PORT = 1025
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST = 'smtp.yandex.ru'  # Для Yandex
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
+EMAIL_HOST_USER = 'Zonanso@yandex.ru'
+EMAIL_HOST_PASSWORD = 'oigyxxpjsmnqmxnx'
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
@@ -167,7 +176,6 @@ LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/news/'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/news/'
 
-
 CSRF_TRUSTED_ORIGINS = ['http://localhost:8000']
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
@@ -183,9 +191,9 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': 'INFO',
         },
-        'allauth': {
+        'NewsPortal': {
             'handlers': ['console'],
             'level': 'DEBUG',
         },
@@ -197,3 +205,11 @@ ACCOUNT_FORMS = {
     'login': 'NewsPortal.forms.CustomLoginForm',
     'signup': 'NewsPortal.forms.CustomSignupForm',
 }
+SITE_URL = 'localhost:8000'
+SERVER_EMAIL = 'Zonanso@yandex.ru'
+DEFAULT_FROM_EMAIL = 'Zonanso@yandex.ru'
+
+APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"  # Формат даты
+APSCHEDULER_RUN_NOW_TIMEOUT = 25  # Таймаут для запуска задач
+
+ADMIN_EMAIL = 'Zonanso@yandex.ru'

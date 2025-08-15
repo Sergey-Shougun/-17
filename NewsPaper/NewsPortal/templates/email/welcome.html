@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Добро пожаловать!</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #f8f9fa; padding: 20px; text-align: center; }
+        .content { padding: 20px; }
+        .footer { margin-top: 20px; text-align: center; color: #6c757d; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Добро пожаловать на {{ site_name }}!</h2>
+        </div>
+
+        <div class="content">
+            <p>Здравствуйте, {{ user.username }}!</p>
+            <p>Спасибо за регистрацию на нашем новостном портале. Теперь вы можете:</p>
+            <ul>
+                <li>Читать эксклюзивные материалы</li>
+                <li>Подписываться на интересные категории</li>
+                <li>Получать уведомления о новых статьях</li>
+                <li>Комментировать публикации</li>
+            </ul>
+            <p>Начните знакомство с порталом: <a href="{{ site_url }}">{{ site_url }}</a></p>
+        </div>
+
+        <div class="footer">
+            <p>С уважением, команда {{ site_name }}</p>
+        </div>
+    </div>
+</body>
+</html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+</body>
+</html>

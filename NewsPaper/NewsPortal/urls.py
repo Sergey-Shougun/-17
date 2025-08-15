@@ -21,4 +21,9 @@ urlpatterns = [
     path('become-author/', views.become_author, name='become_author'),
     path('profile/', views.profile, name='profile'),
     path('profile/edit/', views.ProfileUpdateView.as_view(), name='profile_edit'),
+    path('category/<int:category_id>/subscribe/', views.subscribe_category, name='subscribe_category'),
+    path('category/<int:category_id>/unsubscribe/', views.unsubscribe_category, name='unsubscribe_category'),
+    path('categories/', views.category_list, name='category_list'),
+    path('category/<int:category_id>/', views.category_detail, name='category_detail'),
+    path('subscriptions/', views.my_subscriptions, name='my_subscriptions'),
 ]

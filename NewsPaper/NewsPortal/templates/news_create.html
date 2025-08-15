@@ -1,0 +1,47 @@
+{% block content %}
+<h2>Создать новость</h2>
+
+
+{% if form.errors %}
+<div class="alert alert-danger">
+    <strong>Ошибки формы:</strong>
+    <ul>
+        {% for field, errors in form.errors.items %}
+            <li>{{ field }}: {{ errors|striptags }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+
+
+    <div class="form-group">
+        <label for="{{ form.title.id_for_label }}">Заголовок</label>
+        {{ form.title }}
+        {{ form.title.errors }}
+    </div>
+
+    <div class="form-group">
+        <label for="{{ form.content.id_for_label }}">Содержание</label>
+        {{ form.content }}
+        {{ form.content.errors }}
+    </div>
+
+    <div class="form-group">
+        <label>Категории</label>
+        {% for checkbox in form.categories %}
+        <div class="form-check">
+            {{ checkbox.tag }}
+            <label class="form-check-label" for="{{ checkbox.id_for_label }}">
+                {{ checkbox.choice_label }}
+            </label>
+        </div>
+        {% endfor %}
+        {{ form.categories.errors }}
+    </div>
+
+    <button type="submit" class="btn btn-primary">Опубликовать</button>
+</form>
+{% endblock %}

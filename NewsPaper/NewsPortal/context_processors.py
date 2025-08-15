@@ -1,4 +1,19 @@
 from django.utils.safestring import mark_safe
+from django.conf import settings
+
+
+def site_info(request):
+    return {
+        'SITE_NAME': getattr(settings, 'SITE_NAME', 'News Portal'),
+        'SITE_URL': getattr(settings, 'SITE_URL', 'localhost:8000'),
+    }
+
+
+def site_settings(request):
+    return {
+        'SITE_NAME': settings.SITE_NAME,
+        'SITE_URL': settings.SITE_URL,
+    }
 
 
 def social_login_buttons(request):
@@ -10,4 +25,10 @@ def social_login_buttons(request):
             'alt="Yandex" width="20"> Войти через Yandex'
             '</a>'
         )
+    }
+
+
+def author_status(request):
+    return {
+        'user_is_author': request.user.is_author if request.user.is_authenticated else False
     }

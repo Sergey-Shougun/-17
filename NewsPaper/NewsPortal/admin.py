@@ -2,6 +2,17 @@ from django.contrib import admin
 from .models import Author, Category, Post, Comment, PostCategory
 
 
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'subscribers_count')
+    search_fields = ('name',)
+
+    def subscribers_count(self, obj):
+        return obj.subscribers.count()
+
+    subscribers_count.short_description = 'Подписчиков'
+
+
 @admin.register(Author)
 class AuthorAdmin(admin.ModelAdmin):
     list_display = ('user', 'rating', 'created_at')
@@ -31,11 +42,6 @@ class PostAdmin(admin.ModelAdmin):
     )
 
 
-class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('name',)
-    search_fields = ('name',)
-
-
 class CommentAdmin(admin.ModelAdmin):
     list_display = ('post', 'user', 'created_at', 'rating')
     list_filter = ('created_at', 'rating')
@@ -43,6 +49,5 @@ class CommentAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Post, PostAdmin)
-admin.site.register(Category, CategoryAdmin)
 admin.site.register(Comment, CommentAdmin)
 admin.site.register(PostCategory)

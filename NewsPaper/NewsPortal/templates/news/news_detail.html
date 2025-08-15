@@ -6,14 +6,18 @@
         <h1>{{ news.title|censor }}</h1>
         <div class="news-meta">
             <strong>Тип:</strong> {{ news.get_post_type_display_name }}
-
             <strong>Автор:</strong> {{ news.author.user.username }}
-
             <strong>Дата публикации:</strong> {{ news.created_at|date:"d.m.Y H:i" }}
-
             <strong>Рейтинг:</strong> {{ news.rating }}
 
-            <strong>Категории:</strong> {{ news.get_categories_display }}
+            {% if news.categories.all %}
+                <span>Категории:
+                    {% for category in news.categories.all %}
+                        <a href="{% url 'NewsPortal:category_detail' category.id %}">{{ category.name }}</a>
+                        {% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </span>
+            {% endif %}
         </div>
 
         <div class="news-content">
@@ -28,8 +32,6 @@
         {% endif %}
 
         <div class="actions">
-            <a href="{% url 'NewsPortal:news_edit' news.pk %}" class="btn">Редактировать</a>
-            <a href="{% url 'NewsPortal:news_delete' news.pk %}" class="btn danger">Удалить</a>
             <a href="{% url 'NewsPortal:news_list' %}" class="btn">Вернуться к списку новостей</a>
         </div>
     </article>

@@ -31,6 +31,56 @@
                 Редактировать профиль
             </a>
         {% endif %}
+        {% if subscriber %}
+        <div class="card mb-4">
+            <div class="card-header">Еженедельная рассылка</div>
+            <div class="card-body">
+                <p class="card-text">
+                    {% if subscriber.is_active %}
+                        Вы подписаны на еженедельную рассылку новых статей.
+                        Последняя рассылка:
+                        {% if subscriber.last_digest_sent %}
+                            {{ subscriber.last_digest_sent|date:"d.m.Y H:i" }}
+                        {% else %}
+                            еще не отправлялась
+                        {% endif %}
+                    {% else %}
+                        Вы не подписаны на еженедельную рассылку.
+                    {% endif %}
+                </p>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="toggle_digest" value="1">
+                    <button type="submit" class="btn btn-{% if subscriber.is_active %}danger{% else %}success{% endif %}">
+                        {% if subscriber.is_active %}Отписаться{% else %}Подписаться{% endif %}
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+        {% if subscriber %}
+        <h3>Ваши подписки на категории</h3>
+        <ul>
+        {% for category in subscribed_categories %}
+            <li>
+                {{ category.name }}
+                <a href="{% url 'NewsPortal:unsubscribe_category' category.id %}">Отписаться</a>
+            </li>
+        {% empty %}
+            <li>Вы не подписаны ни на одну категорию</li>
+        {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+     <div class="mt-4">
+        <h3>Управление подписками</h3>
+        <a href="{% url 'NewsPortal:my_subscriptions' %}" class="btn btn-info">
+            Мои подписки ({{ user.subscribed_categories.count }})
+        </a>
+        <a href="{% url 'NewsPortal:category_list' %}" class="btn btn-success">
+            Все категории
+        </a>
     </div>
 </div>
 {% endblock %}

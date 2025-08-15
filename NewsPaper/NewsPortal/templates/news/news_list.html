@@ -4,7 +4,15 @@
 {% block content %}
     <h1>Последние новости</h1>
     <p>Всего новостей: {{ total_news }}</p>
-
+    <div class="category-links">
+        Категории:
+        {% for category in categories %}
+            <a href="{% url 'NewsPortal:category_detail' category.id %}"
+               class="badge bg-secondary">
+                {{ category.name }}
+            </a>
+        {% endfor %}
+    </div>
     <table>
         <thead>
             <tr>
@@ -42,6 +50,26 @@
             {% endif %}
         </span>
     </div>
+    <div class="container">
+        <h1>
+            Новости
+            {% if category %}в категории "{{ category.name }}"
+                {% if user.is_authenticated %}
+                    {% if user in category.subscribers.all %}
+                        <a href="{% url 'NewsPortal:unsubscribe_category' category.id %}"
+                           class="btn btn-sm btn-danger">
+                            Отписаться
+                        </a>
+                    {% else %}
+                        <a href="{% url 'NewsPortal:subscribe_category' category.id %}"
+                           class="btn btn-sm btn-success">
+                            Подписаться
+                        </a>
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+        </h1>
+    </div>
 
     <style>
         .pagination {
@@ -56,6 +84,13 @@
         .pagination .current {
             font-weight: bold;
             margin: 0 10px;
+        }
+         .category-links {
+            margin-bottom: 20px;
+        }
+        .badge {
+            margin-right: 5px;
+            text-decoration: none;
         }
     </style>
 {% endblock %}

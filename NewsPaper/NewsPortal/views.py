@@ -1,8 +1,8 @@
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from .filters import PostFilter
-from .forms import PostForm
-from .models import Post, Author
+from .forms import NewsCreateForm
+from .models import Post, Author, Category, PostCategory, Subscriber
 from django.core.paginator import Paginator
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
@@ -10,8 +10,50 @@ from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
-from django.shortcuts import redirect, get_object_or_404
-from django.shortcuts import render
+from django.shortcuts import redirect
+from django.shortcuts import render, get_object_or_404
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.utils import timezone
+from datetime import timedelta
+from .signals import send_author_request_email
+
+
+@login_required
+def my_subscriptions(request):
+    try:
+        subscriber = Subscriber.objects.get(user=request.user)
+        categories = subscriber.categories.all()
+    except Subscriber.DoesNotExist:
+        categories = []
+
+    return render(request, 'my_subscriptions.html', {
+        'categories': categories
+    })
+
+
+def category_list(request):
+    categories = Category.objects.all()
+    return render(request, 'category_list.html', {'categories': categories})
+
+
+def category_detail(request, category_id):
+    category = get_object_or_404(Category, id=category_id)
+    posts = Post.objects.filter(categories=category).order_by('-created_at')
+
+    # Проверяем, подписан ли пользователь на эту категорию
+    is_subscribed = False
+    if request.user.is_authenticated:
+        try:
+            subscriber = Subscriber.objects.get(user=request.user)
+            is_subscribed = category in subscriber.categories.all()
+        except Subscriber.DoesNotExist:
+            pass
+
+    return render(request, 'category_detail.html', {
+        'category': category,
+        'posts': posts,
+        'is_subscribed': is_subscribed
+    })
 
 
 class ProfileUpdateView(LoginRequiredMixin, UpdateView):
@@ -29,13 +71,35 @@ def permission_denied_view(request, exception):
 
 
 @login_required
-def become_author(request):
-    author_group, created = Group.objects.get_or_create(name='authors')
-    request.user.groups.add(author_group)
-    from .models import Author
-    Author.objects.get_or_create(user=request.user)
+def subscribe_category(request, category_id):
+    category = get_object_or_404(Category, id=category_id)
 
-    return redirect('NewsPortal:profile')
+    subscriber, created = Subscriber.objects.get_or_create(user=request.user)
+
+    if category not in subscriber.categories.all():
+        subscriber.categories.add(category)
+        messages.success(request, f'Вы подписались на рассылку категории "{category.name}"')
+    else:
+        messages.info(request, f'Вы уже подписаны на категорию "{category.name}"')
+
+    return redirect(request.META.get('HTTP_REFERER', reverse('NewsPortal:category_list')))
+
+
+@login_required
+def unsubscribe_category(request, category_id):
+    category = get_object_or_404(Category, id=category_id)
+
+    try:
+        subscriber = Subscriber.objects.get(user=request.user)
+        if category in subscriber.categories.all():
+            subscriber.categories.remove(category)
+            messages.success(request, f'Вы отписались от рассылки категории "{category.name}"')
+        else:
+            messages.info(request, 'Вы не были подписаны на эту категорию')
+    except Subscriber.DoesNotExist:
+        messages.info(request, 'У вас нет активных подписок')
+
+    return redirect(request.META.get('HTTP_REFERER', reverse('NewsPortal:category_list')))
 
 
 def news_detail(request, pk):
@@ -45,7 +109,7 @@ def news_detail(request, pk):
 
 def article_list(request):
     articles = Post.objects.filter(post_type='AR').order_by('-created_at')
-    paginator = Paginator(articles, 10)  # 10 статей на странице
+    paginator = Paginator(articles, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -62,13 +126,15 @@ def article_detail(request, pk):
 
 def news_list(request):
     news = Post.objects.filter(post_type='NW').order_by('-created_at')
+    categories = Category.objects.all()
     paginator = Paginator(news, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
     return render(request, 'news/news_list.html', {
         'page_obj': page_obj,
-        'total_news': news.count()
+        'total_news': news.count(),
+        'categories': categories
     })
 
 
@@ -99,7 +165,7 @@ class AuthorRequiredMixin(UserPassesTestMixin):
 
 
 class NewsCreate(AuthorRequiredMixin, LoginRequiredMixin, CreateView):
-    form_class = PostForm
+    form_class = NewsCreateForm
     model = Post
     template_name = 'news/post_edit.html'
     login_url = '/accounts/login/'
@@ -113,8 +179,41 @@ class NewsCreate(AuthorRequiredMixin, LoginRequiredMixin, CreateView):
             return redirect('NewsPortal:become_author')
 
     def form_valid(self, form):
+
+        try:
+            author = self.request.user.author
+        except Author.DoesNotExist:
+            author = Author.objects.create(user=self.request.user)
+
+        time_threshold = timezone.now() - timedelta(days=1)
+        news_count = Post.objects.filter(
+            author=author,
+            post_type=Post.NEWS,
+            created_at__gte=time_threshold
+        ).count()
+
+        if news_count >= 3:
+            form.add_error(None, ValidationError('Вы не можете публиковать более 3 новостей в сутки.'))
+            return self.form_invalid(form)
+
         post = form.save(commit=False)
-        post.post_type = 'NW'
+        post.author = author
+        post.post_type = Post.NEWS
+        print(f"Создаем новость: {post.title}")
+        print(f"Автор: {author.user.username}")
+        print(f"Категории: {[c.name for c in form.cleaned_data['categories']]}")
+
+        post.save()
+
+        print(f"Новость создана! ID: {post.id}")
+
+        for category in form.cleaned_data['categories']:
+            print(f"Связываем с категорией: {category.name}")
+            PostCategory.objects.create(post=post, category=category)
+
+        self.object = post
+
+        messages.success(self.request, "Новость успешно опубликована!")
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -122,7 +221,7 @@ class NewsCreate(AuthorRequiredMixin, LoginRequiredMixin, CreateView):
 
 
 class NewsUpdate(LoginRequiredMixin, UpdateView):
-    form_class = PostForm
+    form_class = NewsCreateForm
     model = Post
     template_name = 'news/post_edit.html'
     login_url = '/accounts/login/'
@@ -148,6 +247,15 @@ class NewsUpdate(LoginRequiredMixin, UpdateView):
         return reverse_lazy('NewsPortal:news_detail', kwargs={'pk': self.object.pk})
 
     def form_valid(self, form):
+
+        post = form.save(commit=False)
+        post.save()
+
+        PostCategory.objects.filter(post=post).delete()
+
+        for category in form.cleaned_data['categories']:
+            PostCategory.objects.create(post=post, category=category)
+
         return super().form_valid(form)
 
 
@@ -176,7 +284,7 @@ class NewsDelete(LoginRequiredMixin, DeleteView):
 
 
 class ArticleCreate(AuthorRequiredMixin, LoginRequiredMixin, CreateView):
-    form_class = PostForm
+    form_class = NewsCreateForm
     model = Post
     template_name = 'news/article_edit.html'
     login_url = '/accounts/login/'
@@ -190,8 +298,21 @@ class ArticleCreate(AuthorRequiredMixin, LoginRequiredMixin, CreateView):
             return redirect('NewsPortal:become_author')
 
     def form_valid(self, form):
+
+        try:
+            author = self.request.user.author
+        except Author.DoesNotExist:
+            author = Author.objects.create(user=self.request.user)
+
         post = form.save(commit=False)
-        post.post_type = 'AR'
+        post.author = author
+        post.post_type = Post.ARTICLE
+        post.save()
+
+        for category in form.cleaned_data['categories']:
+            PostCategory.objects.create(post=post, category=category)
+
+        self.object = post
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -199,7 +320,7 @@ class ArticleCreate(AuthorRequiredMixin, LoginRequiredMixin, CreateView):
 
 
 class ArticleUpdate(LoginRequiredMixin, UpdateView):
-    form_class = PostForm
+    form_class = NewsCreateForm
     model = Post
     template_name = 'news/article_edit.html'
     login_url = '/accounts/login/'
@@ -225,6 +346,15 @@ class ArticleUpdate(LoginRequiredMixin, UpdateView):
         return reverse_lazy('NewsPortal:article_detail', kwargs={'pk': self.object.pk})
 
     def form_valid(self, form):
+
+        post = form.save(commit=False)
+        post.save()
+
+        PostCategory.objects.filter(post=post).delete()
+
+        for category in form.cleaned_data['categories']:
+            PostCategory.objects.create(post=post, category=category)
+
         return super().form_valid(form)
 
 
@@ -254,26 +384,39 @@ class ArticleDelete(LoginRequiredMixin, DeleteView):
 
 @login_required
 def become_author(request):
-    author_group = Group.objects.get_or_create(name='authors')[0]
-    request.user.groups.add(author_group)
-
-    Author.objects.get_or_create(user=request.user)
-
+    user = request.user
+    if not Author.objects.filter(user=user).exists():
+        Author.objects.create(user=user)
+        send_author_request_email(user)
+        messages.success(request, 'Ваша заявка на статус автора отправлена администратору!')
     return redirect('NewsPortal:profile')
 
 
 @login_required
 def profile(request):
     try:
-        author_profile = Author.objects.get(user=request.user)
-    except Author.DoesNotExist:
-        author_profile = None
+        subscriber = request.user.digest_subscriber
+    except Subscriber.DoesNotExist:
+        subscriber = None
+
+    if request.method == 'POST' and 'toggle_digest' in request.POST:
+        if not subscriber:
+            subscriber = Subscriber.objects.create(user=request.user)
+
+        if subscriber.unsubscribed_at:
+            subscriber.unsubscribed_at = None
+            messages.success(request, "Вы подписались на еженедельную рассылку")
+        else:
+            subscriber.unsubscribed_at = timezone.now()
+            messages.success(request, "Вы отписались от еженедельной рассылки")
+        subscriber.save()
+        return redirect('NewsPortal:profile')
+
+    subscribed_categories = subscriber.categories.all() if subscriber else []
 
     context = {
         'user': request.user,
-        'is_author': request.user.groups.filter(name='authors').exists(),
-        'author_profile': author_profile,
+        'subscriber': subscriber,
+        'subscribed_categories': subscribed_categories
     }
     return render(request, 'account/profile.html', context)
-
-# Create your views here.
