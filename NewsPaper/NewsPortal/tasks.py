@@ -1,47 +1,28 @@
 import logging
+from celery import shared_task
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 from django.conf import settings
 from django.utils import timezone
 from datetime import timedelta
-from django.core.mail import EmailMultiAlternatives
-from django.template.loader import render_to_string
-from django.apps import apps
-from django.db import DatabaseError
-from apscheduler.jobstores.base import JobLookupError
-
-try:
-    from apscheduler.schedulers.background import BackgroundScheduler
-    from django_apscheduler.jobstores import DjangoJobStore, register_events
-except ImportError:
-    BackgroundScheduler = None
-    DjangoJobStore = None
-    register_events = None
+from .models import Subscriber, Post
 
 logger = logging.getLogger(__name__)
 
 
+@shared_task
 def send_weekly_digest():
-    try:
-        Subscriber = apps.get_model('NewsPortal', 'Subscriber')
-        Post = apps.get_model('NewsPortal', 'Post')
-    except LookupError as e:
-        logger.error(f"Models not found: {str(e)}")
-        return "Skipped: Models not available"
-
     week_ago = timezone.now() - timedelta(days=7)
     subscribers = Subscriber.objects.filter(
-        unsubscribed_at__isnull=True
-    ).prefetch_related('categories')
+        unsubscribed_at__isnull=True,
+        user__email__isnull=False
+    ).prefetch_related('categories').distinct()
 
     total_sent = 0
     errors = 0
 
     for subscriber in subscribers:
         user = subscriber.user
-
-        if not user.email:
-            logger.info(f"Пропускаем пользователя без email: {user.username}")
-            continue
-
         categories = subscriber.categories.all()
 
         if not categories:
@@ -49,24 +30,19 @@ def send_weekly_digest():
             continue
 
         try:
-            new_posts = Post.objects.filter(
+            posts = Post.objects.filter(
                 categories__in=categories,
                 created_at__gte=week_ago,
-                created_at__lte=timezone.now()
+                post_type='NW'
             ).distinct().order_by('-created_at')
-        except DatabaseError as e:
-            logger.error(f"Ошибка получения статей: {str(e)}")
-            errors += 1
-            continue
 
-        if not new_posts:
-            logger.info(f"Нет новых статей для подписчика {user.username}")
-            continue
+            if not posts:
+                logger.info(f"Нет новых статей для подписчика {user.username}")
+                continue
 
-        try:
             context = {
+                'posts': posts,
                 'user': user,
-                'new_posts': new_posts,
                 'site_url': settings.SITE_URL,
                 'site_name': settings.SITE_NAME,
                 'week_start': week_ago.date(),
@@ -79,13 +55,10 @@ def send_weekly_digest():
                 subject=f'Еженедельная подборка новостей от {settings.SITE_NAME}',
                 body='',
                 from_email=settings.DEFAULT_FROM_EMAIL,
-                to=[user.email],
+                to=[user.email]
             )
             msg.attach_alternative(html_content, "text/html")
             msg.send()
-
-            subscriber.last_digest_sent = timezone.now()
-            subscriber.save()
 
             total_sent += 1
             logger.info(f"Sent weekly digest to {user.email}")
@@ -96,32 +69,36 @@ def send_weekly_digest():
     return f"Рассылка завершена. Отправлено: {total_sent}, ошибок: {errors}"
 
 
-def start_scheduler():
-    if BackgroundScheduler is None or DjangoJobStore is None:
-        logger.warning("APScheduler not installed. Skipping scheduler start.")
-        return
-
+@shared_task
+def send_new_post_notifications(post_id):
     try:
-        scheduler = BackgroundScheduler(timezone=settings.TIME_ZONE)
-        scheduler.add_jobstore(DjangoJobStore(), "default")
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
 
-        scheduler.add_job(
-            send_weekly_digest,
-            trigger='cron',
-            day_of_week='mon',
-            hour=9,
-            minute=0,
-            id='weekly_digest',
-            max_instances=1,
-            replace_existing=True,
-        )
+        post = Post.objects.get(id=post_id)
+        users = set()
 
-        register_events(scheduler)
-        logger.info("Starting scheduler...")
-        scheduler.start()
-        logger.info("Scheduler started successfully")
+        for category in post.categories.all():
+            users.update(category.subscribers.all())
 
+        for user in users:
+            if user.email:
+                html_content = render_to_string(
+                    'email/new_post_notification.html',
+                    {'post': post, 'user': user}
+                )
 
+                msg = EmailMultiAlternatives(
+                    subject=post.title,
+                    body='',
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    to=[user.email]
+                )
+                msg.attach_alternative(html_content, "text/html")
+                msg.send()
+                logger.info(f"Sent new post notification to {user.email}")
 
+    except Post.DoesNotExist:
+        logger.error(f"Post with id {post_id} does not exist")
     except Exception as e:
-        logger.error(f"Failed to start scheduler: {str(e)}")
+        logger.error(f"Error in send_new_post_notifications: {str(e)}")

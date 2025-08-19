@@ -47,7 +47,8 @@ INSTALLED_APPS = [
     'mc_donalds',
     'simpleapp',
     'django_filters',
-    'NewsPortal.apps.NewsPortalConfig'
+    'NewsPortal.apps.NewsPortalConfig',
+    'django_celery_beat'
 ]
 
 MIDDLEWARE = [
@@ -209,7 +210,16 @@ SITE_URL = 'localhost:8000'
 SERVER_EMAIL = 'Zonanso@yandex.ru'
 DEFAULT_FROM_EMAIL = 'Zonanso@yandex.ru'
 
-APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"  # Формат даты
-APSCHEDULER_RUN_NOW_TIMEOUT = 25  # Таймаут для запуска задач
+APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
+APSCHEDULER_RUN_NOW_TIMEOUT = 25
 
 ADMIN_EMAIL = 'Zonanso@yandex.ru'
+
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Europe/Moscow'
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+CELERY_TASK_ALWAYS_EAGER = True

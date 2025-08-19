@@ -1,17 +1,19 @@
-from django.dispatch import receiver
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.conf import settings
-from .models import Post, Category, PostCategory
+from .models import PostCategory
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
-from django.db.models.signals import post_save
-from allauth.account.signals import user_signed_up, email_confirmed
-from allauth.account.models import EmailAddress
-from django.utils import timezone
+from allauth.account.signals import email_confirmed
 import logging
 from .models import Subscriber
 from django.core.mail import send_mail
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from .models import Post
+from .tasks import send_new_post_notifications
+from celery.exceptions import OperationalError
+from django.db import transaction
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
@@ -20,6 +22,24 @@ logger.info("### Signals module loaded successfully! ###")
 logger.info("############################################")
 
 logger.info("Модуль signals.py загружен! Сигналы должны работать")
+
+# signals.py
+
+
+@receiver(post_save, sender=Post)
+def notify_subscribers(sender, instance, created, **kwargs):
+    if created and instance.post_type == 'NW':
+        try:
+            # Асинхронная отправка
+            send_new_post_notifications.delay(instance.id)
+        except OperationalError as e:
+            logger.error(f"Celery error: {str(e)}")
+            logger.info("Falling back to synchronous execution")
+
+            # Синхронная отправка в случае ошибки
+            transaction.on_commit(
+                lambda: send_new_post_notifications(instance.id)
+            )
 
 
 @receiver(email_confirmed)
