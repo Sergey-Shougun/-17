@@ -1,0 +1,112 @@
+2025-08-22 23:53:37,513 ERROR: ERROR сообщение от django.request
+Path: C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py
+Stack: (<class 'ValueError'>, ValueError('Тестовая ошибка'), <traceback object at 0x0000021D1FCB8CC0>)
+Traceback (most recent call last):
+  File "C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py", line 30, in handle
+    raise ValueError("Тестовая ошибка")
+ValueError: Тестовая ошибка
+2025-08-22 23:53:37,516 ERROR: ERROR сообщение от django.db.backends
+Path: C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py
+Stack: (<class 'ValueError'>, ValueError('Тестовая ошибка'), <traceback object at 0x0000021D1FCB8CC0>)
+Traceback (most recent call last):
+  File "C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py", line 30, in handle
+    raise ValueError("Тестовая ошибка")
+ValueError: Тестовая ошибка
+2025-08-22 23:53:37,517 ERROR: ERROR сообщение от django.template
+Path: C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py
+Stack: (<class 'ValueError'>, ValueError('Тестовая ошибка'), <traceback object at 0x0000021D1FCB8CC0>)
+Traceback (most recent call last):
+  File "C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py", line 30, in handle
+    raise ValueError("Тестовая ошибка")
+ValueError: Тестовая ошибка
+2025-08-22 23:53:37,518 ERROR: ERROR сообщение от django.server
+Path: C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py
+Stack: (<class 'ValueError'>, ValueError('Тестовая ошибка'), <traceback object at 0x0000021D1FCB8CC0>)
+Traceback (most recent call last):
+  File "C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py", line 30, in handle
+    raise ValueError("Тестовая ошибка")
+ValueError: Тестовая ошибка
+2025-08-22 23:54:00,345 ERROR: ERROR сообщение от django.request
+Path: C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py
+Stack: (<class 'ValueError'>, ValueError('Тестовая ошибка'), <traceback object at 0x0000019CF2513140>)
+Traceback (most recent call last):
+  File "C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py", line 30, in handle
+    raise ValueError("Тестовая ошибка")
+ValueError: Тестовая ошибка
+2025-08-22 23:54:00,391 ERROR: ERROR сообщение от django.db.backends
+Path: C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py
+Stack: (<class 'ValueError'>, ValueError('Тестовая ошибка'), <traceback object at 0x0000019CF104ECC0>)
+Traceback (most recent call last):
+  File "C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py", line 30, in handle
+    raise ValueError("Тестовая ошибка")
+ValueError: Тестовая ошибка
+2025-08-22 23:54:00,393 ERROR: ERROR сообщение от django.template
+Path: C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py
+Stack: (<class 'ValueError'>, ValueError('Тестовая ошибка'), <traceback object at 0x0000019CF104ECC0>)
+Traceback (most recent call last):
+  File "C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py", line 30, in handle
+    raise ValueError("Тестовая ошибка")
+ValueError: Тестовая ошибка
+2025-08-22 23:54:00,394 ERROR: ERROR сообщение от django.server
+Path: C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py
+Stack: (<class 'ValueError'>, ValueError('Тестовая ошибка'), <traceback object at 0x0000019CF104ECC0>)
+Traceback (most recent call last):
+  File "C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py", line 30, in handle
+    raise ValueError("Тестовая ошибка")
+ValueError: Тестовая ошибка
+2025-08-22 23:57:16,136 ERROR: ERROR сообщение от django.request
+Path: C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py
+Stack: (<class 'ValueError'>, ValueError('Тестовая ошибка'), <traceback object at 0x0000022C0A4692C0>)
+Traceback (most recent call last):
+  File "C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py", line 30, in handle
+    raise ValueError("Тестовая ошибка")
+ValueError: Тестовая ошибка
+2025-08-22 23:57:16,139 ERROR: ERROR сообщение от django.db.backends
+Path: C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py
+Stack: (<class 'ValueError'>, ValueError('Тестовая ошибка'), <traceback object at 0x0000022C0A4692C0>)
+Traceback (most recent call last):
+  File "C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py", line 30, in handle
+    raise ValueError("Тестовая ошибка")
+ValueError: Тестовая ошибка
+2025-08-22 23:57:16,140 ERROR: ERROR сообщение от django.template
+Path: C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py
+Stack: (<class 'ValueError'>, ValueError('Тестовая ошибка'), <traceback object at 0x0000022C0A4692C0>)
+Traceback (most recent call last):
+  File "C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py", line 30, in handle
+    raise ValueError("Тестовая ошибка")
+ValueError: Тестовая ошибка
+2025-08-22 23:57:16,141 ERROR: ERROR сообщение от django.server
+Path: C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py
+Stack: (<class 'ValueError'>, ValueError('Тестовая ошибка'), <traceback object at 0x0000022C0A4692C0>)
+Traceback (most recent call last):
+  File "C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py", line 30, in handle
+    raise ValueError("Тестовая ошибка")
+ValueError: Тестовая ошибка
+2025-08-22 23:57:30,904 ERROR: ERROR сообщение от django.request
+Path: C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py
+Stack: (<class 'ValueError'>, ValueError('Тестовая ошибка'), <traceback object at 0x0000019B9057AD00>)
+Traceback (most recent call last):
+  File "C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py", line 30, in handle
+    raise ValueError("Тестовая ошибка")
+ValueError: Тестовая ошибка
+2025-08-22 23:57:30,951 ERROR: ERROR сообщение от django.db.backends
+Path: C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py
+Stack: (<class 'ValueError'>, ValueError('Тестовая ошибка'), <traceback object at 0x0000019B9057AD00>)
+Traceback (most recent call last):
+  File "C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py", line 30, in handle
+    raise ValueError("Тестовая ошибка")
+ValueError: Тестовая ошибка
+2025-08-22 23:57:30,952 ERROR: ERROR сообщение от django.template
+Path: C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py
+Stack: (<class 'ValueError'>, ValueError('Тестовая ошибка'), <traceback object at 0x0000019B9057AD00>)
+Traceback (most recent call last):
+  File "C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py", line 30, in handle
+    raise ValueError("Тестовая ошибка")
+ValueError: Тестовая ошибка
+2025-08-22 23:57:30,953 ERROR: ERROR сообщение от django.server
+Path: C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py
+Stack: (<class 'ValueError'>, ValueError('Тестовая ошибка'), <traceback object at 0x0000019B9057AD00>)
+Traceback (most recent call last):
+  File "C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py", line 30, in handle
+    raise ValueError("Тестовая ошибка")
+ValueError: Тестовая ошибка

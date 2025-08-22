@@ -22,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-^%@_db(#t7w0*-8m+fpy_j7i)*@*c9pn-_=beq)-211vkqjpff'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = []
 
@@ -181,22 +181,116 @@ CSRF_TRUSTED_ORIGINS = ['http://localhost:8000']
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
 
+# Настройки логирования
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'console_debug': {
+            'format': '%(asctime)s %(levelname)s: %(message)s',
+        },
+        'console_warning': {
+            'format': '%(asctime)s %(levelname)s: %(message)s\nPath: %(pathname)s',
+        },
+        'console_error': {
+            'format': '%(asctime)s %(levelname)s: %(message)s\nPath: %(pathname)s\nStack: %(exc_info)s',
+        },
+        'general_file': {
+            'format': '%(asctime)s %(levelname)s: %(message)s [%(module)s]',
+        },
+        'error_file': {
+            'format': '%(asctime)s %(levelname)s: %(message)s\nPath: %(pathname)s\nStack: %(exc_info)s',
+        },
+        'security_file': {
+            'format': '%(asctime)s %(levelname)s: %(message)s [%(module)s]',
+        },
+        'mail': {
+            'format': '%(asctime)s %(levelname)s: %(message)s\nModule: %(module)s\nPath: %(pathname)s',
+        },
+    },
+    'filters': {
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+    },
     'handlers': {
-        'console': {
+        'console_debug': {
+            'level': 'DEBUG',
+            'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler',
+            'formatter': 'console_debug',
+        },
+        'console_warning': {
+            'level': 'WARNING',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+            'formatter': 'console_warning',
+        },
+        'console_error': {
+            'level': 'ERROR',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+            'formatter': 'console_error',
+        },
+        'general_file': {
+            'level': 'INFO',
+            'filters': ['require_debug_false'],
+            'class': 'logging.FileHandler',
+            'filename': 'general.log',
+            'formatter': 'general_file',
+        },
+        'error_file': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': 'errors.log',
+            'formatter': 'error_file',
+        },
+        'security_file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'security.log',
+            'formatter': 'security_file',
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'django.utils.log.AdminEmailHandler',
+            'formatter': 'mail',
         },
     },
     'loggers': {
         'django': {
-            'handlers': ['console'],
-            'level': 'INFO',
-        },
-        'NewsPortal': {
-            'handlers': ['console'],
+            'handlers': ['console_debug', 'console_warning', 'console_error', 'general_file'],
             'level': 'DEBUG',
+            'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['error_file', 'mail_admins'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.server': {
+            'handlers': ['error_file', 'mail_admins'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.template': {
+            'handlers': ['error_file'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.db.backends': {
+            'handlers': ['error_file'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.security': {
+            'handlers': ['security_file'],
+            'level': 'DEBUG',
+            'propagate': False,
         },
     },
 }
@@ -223,3 +317,17 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Europe/Moscow'
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 CELERY_TASK_ALWAYS_EAGER = True
+
+ADMINS = [
+    ('Sergei', 'sergei_mor@bk.ru'),
+]
+
+EMAIL_SUBJECT_PREFIX = '[Django Errors] '  # Префикс для тем писем
+EMAIL_USE_TLS = True
+
+LOG_DIR = os.path.join(BASE_DIR, 'logs')
+os.makedirs(LOG_DIR, exist_ok=True)
+
+LOGGING['handlers']['general_file']['filename'] = os.path.join(LOG_DIR, 'general.log')
+LOGGING['handlers']['error_file']['filename'] = os.path.join(LOG_DIR, 'errors.log')
+LOGGING['handlers']['security_file']['filename'] = os.path.join(LOG_DIR, 'security.log')

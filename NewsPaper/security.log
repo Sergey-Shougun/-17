@@ -1,0 +1,16 @@
+2025-08-22 23:39:43,828 DEBUG: DEBUG сообщение от django.security [test_logging_manual]
+2025-08-22 23:39:43,829 INFO: INFO сообщение от django.security [test_logging_manual]
+2025-08-22 23:39:43,829 WARNING: WARNING сообщение от django.security [test_logging_manual]
+2025-08-22 23:39:43,829 ERROR: ERROR сообщение от django.security [test_logging_manual]
+Traceback (most recent call last):
+  File "C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py", line 28, in handle
+    raise ValueError("Тестовая ошибка")
+ValueError: Тестовая ошибка
+2025-08-22 23:40:26,295 DEBUG: DEBUG сообщение от django.security [test_logging_manual]
+2025-08-22 23:40:26,295 INFO: INFO сообщение от django.security [test_logging_manual]
+2025-08-22 23:40:26,296 WARNING: WARNING сообщение от django.security [test_logging_manual]
+2025-08-22 23:40:26,296 ERROR: ERROR сообщение от django.security [test_logging_manual]
+Traceback (most recent call last):
+  File "C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py", line 28, in handle
+    raise ValueError("Тестовая ошибка")
+ValueError: Тестовая ошибка

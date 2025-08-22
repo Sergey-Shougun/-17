@@ -1,0 +1,14 @@
+2025-08-22 23:54:00,343 INFO: INFO сообщение от django [test_logging_manual]
+2025-08-22 23:54:00,343 WARNING: WARNING сообщение от django [test_logging_manual]
+2025-08-22 23:54:00,343 ERROR: ERROR сообщение от django [test_logging_manual]
+Traceback (most recent call last):
+  File "C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py", line 30, in handle
+    raise ValueError("Тестовая ошибка")
+ValueError: Тестовая ошибка
+2025-08-22 23:57:30,902 INFO: INFO сообщение от django [test_logging_manual]
+2025-08-22 23:57:30,902 WARNING: WARNING сообщение от django [test_logging_manual]
+2025-08-22 23:57:30,903 ERROR: ERROR сообщение от django [test_logging_manual]
+Traceback (most recent call last):
+  File "C:\Users\Sergei\Desktop\Breaking_News_Portal\NewsPaper\NewsPortal\management\commands\test_logging_manual.py", line 30, in handle
+    raise ValueError("Тестовая ошибка")
+ValueError: Тестовая ошибка
